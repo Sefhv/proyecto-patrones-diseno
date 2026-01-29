@@ -1,0 +1,25 @@
+{
+  "name": "proyecto-patrones-diseno",
+  "version": "1.0.0",
+  "description": "Proyecto aplicación patrones de diseño",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sefhv/proyecto-patrones-diseno.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sefhv/proyecto-patrones-diseno/issues"
+  },
+  "homepage": "https://github.com/Sefhv/proyecto-patrones-diseno#readme",
+  "dependencies": {
+    "express": "5.1.0",
+    "picocolors": "1.1.1"
+  }
+}
