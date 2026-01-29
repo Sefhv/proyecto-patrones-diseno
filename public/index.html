@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos de Comida - Patrones de Diseño</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .intro {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            margin-bottom: 30px;
+        }
+
+        .intro p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pattern-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .pattern-card h4 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .pattern-card p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .endpoint {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9em;
+        }
+
+        .get {
+            background: #61afef;
+            color: white;
+        }
+
+        .post {
+            background: #98c379;
+            color: white;
+        }
+
+        .endpoint-url {
+            color: #e5c07b;
+            font-size: 1.1em;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .code-block code {
+            color: #abb2bf;
+        }
+
+        .json-key {
+            color: #e06c75;
+        }
+
+        .json-string {
+            color: #98c379;
+        }
+
+        .json-number {
+            color: #d19a66;
+        }
+
+        .example-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .response-example {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            margin: 15px 0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        /* Estilos estilo Swagger */
+        .swagger-schema {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .swagger-schema-header {
+            background: #3b4151;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .swagger-schema-header .method-badge {
+            background: #49cc90;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .swagger-schema-body {
+            padding: 20px;
+        }
+
+        .swagger-property {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 0;
+            display: grid;
+            grid-template-columns: 200px 120px 100px 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .swagger-property:last-child {
+            border-bottom: none;
+        }
+
+        .swagger-property-name {
+            font-weight: 600;
+            color: #3b4151;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .swagger-property-type {
+            color: #3b4151;
+            font-size: 0.9em;
+        }
+
+        .swagger-property-required {
+            font-size: 0.85em;
+        }
+
+        .swagger-required {
+            color: #f93e3e;
+            font-weight: 600;
+        }
+
+        .swagger-optional {
+            color: #999;
+        }
+
+        .swagger-property-description {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .swagger-property-example {
+            margin-top: 5px;
+            color: #3b4151;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            background: #f0f0f0;
+            padding: 5px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .swagger-nested {
+            margin-left: 20px;
+            margin-top: 10px;
+            border-left: 2px solid #e0e0e0;
+            padding-left: 15px;
+        }
+
+        .swagger-array-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .swagger-array-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        ul {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .patterns-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .swagger-property {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .swagger-property-name,
+            .swagger-property-type,
+            .swagger-property-required {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🍕 Sistema de Pedidos de Comida</h1>
+            <p>Demostración de Patrones de Diseño en Node.js</p>
+        </header>
+
+        <div class="content">
+            <section class="intro">
+                <h2>📋 Introducción</h2>
+                <p>
+                    Bienvenido al sistema de gestión de pedidos de comida a domicilio. Esta aplicación
+                    demuestra la implementación práctica de tres patrones de diseño fundamentales:
+                    <strong>Singleton</strong>, <strong>Builder</strong> y <strong>Observer</strong>.
+                </p>
+                <p>
+                    El sistema permite crear pedidos de comida de forma estructurada y escalable,
+                    con notificaciones automáticas y configuración centralizada.
+                </p>
+            </section>
+
+            <section>
+                <h2>🎯 Patrones de Diseño Implementados</h2>
+                <div class="patterns-grid">
+                    <div class="pattern-card">
+                        <h4>🔒 Singleton</h4>
+                        <p><strong>Propósito:</strong> Garantizar una única instancia de configuración en toda la
+                            aplicación.</p>
+                        <p><strong>Ubicación:</strong> <code>public/config/AppConfig.js</code></p>
+                        <p><strong>Ventaja:</strong> Evita duplicación y mantiene consistencia en la configuración
+                            global.</p>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h4>🏗️ Builder</h4>
+                        <p><strong>Propósito:</strong> Construir objetos complejos paso a paso de forma legible.</p>
+                        <p><strong>Ubicación:</strong> <code>public/order/OrderBuilder.js</code></p>
+                        <p><strong>Ventaja:</strong> Facilita la creación de pedidos con múltiples parámetros
+                            opcionales.</p>
+                    </div>
+
+                    <div class="pattern-card">
+                        <h4>👁️ Observer</h4>
+                        <p><strong>Propósito:</strong> Sistema de notificaciones desacoplado para eventos.</p>
+                        <p><strong>Ubicación:</strong> <code>public/notifications/</code></p>
+                        <p><strong>Ventaja:</strong> Permite agregar nuevos observadores sin modificar código existente.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>🚀 Cómo Usar los Servicios</h2>
+
+                <h3>1. Ver la Configuración (Singleton)</h3>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/api/config</span>
+                    </div>
+                    <p style="color: #abb2bf; margin-top: 10px;">
+                        Obtiene la configuración única de la aplicación. Demuestra el patrón Singleton.
+                    </p>
+                </div>
+
+                <div class="example-section">
+                    <h4>Ejemplo de uso con cURL:</h4>
+                    <div class="code-block">
+                        <code>
+<span style="color: #61afef;">curl</span> http://localhost:8080/api/config
+                        </code>
+                    </div>
+
+                    <div class="response-example">
+                        <strong>Respuesta esperada:</strong>
+                        <pre style="margin-top: 10px;">{
+  "message": "Esta es la configuración única de la aplicación (Singleton)",
+  "config": {
+    "appName": "Sistema de Pedidos de Comida",
+    "version": "1.0.0",
+    "defaultCurrency": "EUR",
+    "supportEmail": "soporte@mi-restaurante.com"
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <h3>2. Crear un Pedido de Demostración</h3>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/orders/create-demo</span>
+                    </div>
+                    <p style="color: #abb2bf; margin-top: 10px;">
+                        Crea un pedido de ejemplo predefinido. Demuestra los patrones Builder y Observer.
+                    </p>
+                </div>
+
+                <div class="example-section">
+                    <h4>Ejemplo de uso con cURL:</h4>
+                    <div class="code-block">
+                        <code>
+<span style="color: #61afef;">curl</span> -X POST http://localhost:8080/api/orders/create-demo \
+  -H <span style="color: #98c379;">"Content-Type: application/json"</span>
+                        </code>
+                    </div>
+
+                    <div class="response-example">
+                        <strong>Respuesta esperada:</strong>
+                        <pre style="margin-top: 10px;">{
+  "success": true,
+  "message": "Pedido creado exitosamente",
+  "order": {
+    "id": 1234567890,
+    "customerName": "Juan Pérez",
+    "address": "Calle Falsa 123, Ciudad X",
+    "items": [
+      {"name": "Pizza Margarita", "quantity": 2, "price": 8.5},
+      {"name": "Refresco Cola", "quantity": 3, "price": 1.5}
+    ],
+    "deliveryFee": 3,
+    "total": 24.5,
+    "paymentMethod": "CARD",
+    "status": "CREATED",
+    "createdAt": "2026-01-28T..."
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <h3>3. Crear un Pedido Personalizado</h3>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/api/orders</span>
+                    </div>
+                    <p style="color: #abb2bf; margin-top: 10px;">
+                        Crea un pedido personalizado con tus propios datos. Demuestra el patrón Builder.
+                    </p>
+                </div>
+
+                <div class="example-section">
+                    <h4>Estructura del cuerpo de la petición:</h4>
+                    <div class="code-block">
+                        <code>
+{
+  <span style="color: #e06c75;">"customerName"</span>: <span style="color: #98c379;">"María López"</span>,
+  <span style="color: #e06c75;">"address"</span>: <span style="color: #98c379;">"Av. Principal 45, Ciudad Y"</span>,
+  <span style="color: #e06c75;">"items"</span>: [
+    {
+      <span style="color: #e06c75;">"name"</span>: <span style="color: #98c379;">"Hamburguesa Doble"</span>,
+      <span style="color: #e06c75;">"quantity"</span>: <span style="color: #d19a66;">1</span>,
+      <span style="color: #e06c75;">"price"</span>: <span style="color: #d19a66;">10</span>
+    },
+    {
+      <span style="color: #e06c75;">"name"</span>: <span style="color: #98c379;">"Papas Fritas"</span>,
+      <span style="color: #e06c75;">"quantity"</span>: <span style="color: #d19a66;">2</span>,
+      <span style="color: #e06c75;">"price"</span>: <span style="color: #d19a66;">2.5</span>
+    }
+  ],
+  <span style="color: #e06c75;">"deliveryFee"</span>: <span style="color: #d19a66;">2</span>,
+  <span style="color: #e06c75;">"paymentMethod"</span>: <span style="color: #98c379;">"CASH"</span>
+}
+                        </code>
+                    </div>
+
+                    <h4>Ejemplo de uso con cURL:</h4>
+                    <div class="code-block">
+                        <code>
+<span style="color: #61afef;">curl</span> -X POST http://localhost:8080/api/orders \
+  -H <span style="color: #98c379;">"Content-Type: application/json"</span> \
+  -d <span style="color: #98c379;">'{
+    "customerName": "María López",
+    "address": "Av. Principal 45",
+    "items": [
+      {"name": "Hamburguesa", "quantity": 2, "price": 10},
+      {"name": "Patatas", "quantity": 1, "price": 2.5}
+    ],
+    "deliveryFee": 2,
+    "paymentMethod": "CASH"
+  }'</span>
+                        </code>
+                    </div>
+
+                    <div class="response-example">
+                        <strong>Respuesta exitosa:</strong>
+                        <pre style="margin-top: 10px;">{
+  "success": true,
+  "message": "Pedido creado exitosamente",
+  "order": {
+    "id": 1234567890,
+    "customerName": "María López",
+    "address": "Av. Principal 45",
+    "items": [...],
+    "deliveryFee": 2,
+    "total": 24.5,
+    "paymentMethod": "CASH",
+    "status": "CREATED",
+    "createdAt": "2026-01-28T..."
+  }
+}</pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>📝 Esquema de Datos (Swagger Style)</h2>
+
+                <div class="swagger-schema">
+                    <div class="swagger-schema-header">
+                        <span class="method-badge">POST</span>
+                        <span>/api/orders</span>
+                        <span style="margin-left: auto; opacity: 0.8;">Request Body</span>
+                    </div>
+                    <div class="swagger-schema-body">
+                        <div class="swagger-property">
+                            <div class="swagger-property-name">customerName</div>
+                            <div class="swagger-property-type">string</div>
+                            <div class="swagger-property-required">
+                                <span class="swagger-required">required</span>
+                            </div>
+                            <div class="swagger-property-description">
+                                Nombre completo del cliente que realiza el pedido
+                                <div class="swagger-property-example">"María López"</div>
+                            </div>
+                        </div>
+
+                        <div class="swagger-property">
+                            <div class="swagger-property-name">address</div>
+                            <div class="swagger-property-type">string</div>
+                            <div class="swagger-property-required">
+                                <span class="swagger-required">required</span>
+                            </div>
+                            <div class="swagger-property-description">
+                                Dirección completa de entrega del pedido
+                                <div class="swagger-property-example">"Av. Principal 45, Ciudad Y"</div>
+                            </div>
+                        </div>
+
+                        <div class="swagger-property">
+                            <div class="swagger-property-name">items</div>
+                            <div class="swagger-property-type">array[object]</div>
+                            <div class="swagger-property-required">
+                                <span class="swagger-required">required</span>
+                            </div>
+                            <div class="swagger-property-description">
+                                Lista de productos del pedido. Mínimo 1 item requerido.
+                                <div class="swagger-array-item">
+                                    <div class="swagger-array-label">Array items:</div>
+                                    <div class="swagger-nested">
+                                        <div class="swagger-property">
+                                            <div class="swagger-property-name">name</div>
+                                            <div class="swagger-property-type">string</div>
+                                            <div class="swagger-property-required">
+                                                <span class="swagger-required">required</span>
+                                            </div>
+                                            <div class="swagger-property-description">
+                                                Nombre del producto
+                                                <div class="swagger-property-example">"Hamburguesa Doble"</div>
+                                            </div>
+                                        </div>
+                                        <div class="swagger-property">
+                                            <div class="swagger-property-name">quantity</div>
+                                            <div class="swagger-property-type">number</div>
+                                            <div class="swagger-property-required">
+                                                <span class="swagger-required">required</span>
+                                            </div>
+                                            <div class="swagger-property-description">
+                                                Cantidad del producto
+                                                <div class="swagger-property-example">1</div>
+                                            </div>
+                                        </div>
+                                        <div class="swagger-property">
+                                            <div class="swagger-property-name">price</div>
+                                            <div class="swagger-property-type">number</div>
+                                            <div class="swagger-property-required">
+                                                <span class="swagger-required">required</span>
+                                            </div>
+                                            <div class="swagger-property-description">
+                                                Precio unitario del producto
+                                                <div class="swagger-property-example">10</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="swagger-property-example" style="margin-top: 10px;">
+                                    [{"name": "Hamburguesa", "quantity": 2, "price": 10}, {"name": "Patatas",
+                                    "quantity": 1, "price": 2.5}]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="swagger-property">
+                            <div class="swagger-property-name">deliveryFee</div>
+                            <div class="swagger-property-type">number</div>
+                            <div class="swagger-property-required">
+                                <span class="swagger-optional">optional</span>
+                            </div>
+                            <div class="swagger-property-description">
+                                Costo de envío del pedido. Por defecto: 0
+                                <div class="swagger-property-example">2</div>
+                            </div>
+                        </div>
+
+                        <div class="swagger-property">
+                            <div class="swagger-property-name">paymentMethod</div>
+                            <div class="swagger-property-type">string</div>
+                            <div class="swagger-property-required">
+                                <span class="swagger-optional">optional</span>
+                            </div>
+                            <div class="swagger-property-description">
+                                Método de pago. Valores posibles: "CASH", "CARD". Por defecto: "CASH"
+                                <div class="swagger-property-example">"CARD"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="response-example" style="margin-top: 20px;">
+                    <strong>📋 Ejemplo completo de Request Body:</strong>
+                    <pre
+                        style="margin-top: 10px; background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;">{
+  "customerName": "María López",
+  "address": "Av. Principal 45, Ciudad Y",
+  "items": [
+    {
+      "name": "Hamburguesa Doble",
+      "quantity": 1,
+      "price": 10
+    },
+    {
+      "name": "Patatas Fritas",
+      "quantity": 2,
+      "price": 2.5
+    }
+  ],
+  "deliveryFee": 2,
+  "paymentMethod": "CASH"
+}</pre>
+                </div>
+            </section>
+
+            <section>
+                <h2>💡 Notas Importantes</h2>
+                <ul>
+                    <li>El servidor se ejecuta en <code>http://localhost:8080</code></li>
+                    <li>Los observadores (EmailObserver y LogObserver) se ejecutan automáticamente cuando se crea un
+                        pedido</li>
+                    <li>En la consola del servidfor se pueden ver las notificaciones de los observadores</li>
+                    <li>El patrón de diseño Builder valida que todos los campos requeridos estén presentes antes de
+                        crear un pedido</li>
+                    <li>El total se calcula automáticamente sumando el costo de los items más el deliveryFee</li>
+                </ul>
+            </section>
+        </div>
+
+        <footer>
+            <p>Proyecto de Patrones de Diseño - Node.js | Singleton, Builder, Observer</p>
+        </footer>
+    </div>
+
+</body>
+
+</html>
