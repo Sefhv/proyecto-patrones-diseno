@@ -28,7 +28,7 @@ npm start
 
 El servidor se ejecutará en `http://localhost:8080`
 
-## 📡 Endpoints
+## Endpoints
 
 - `GET /` - Página principal con información de la aplicación
 - `GET /api/config` - Ver configuración (demuestra Singleton)

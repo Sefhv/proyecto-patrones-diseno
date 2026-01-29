@@ -355,6 +355,165 @@
             padding: 20px;
         }
 
+        /* Estilos para notificaciones bonitas */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+            border-left: 5px solid;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-left-color: #4caf50;
+        }
+
+        .notification.error {
+            border-left-color: #f44336;
+        }
+
+        .notification.info {
+            border-left-color: #2196f3;
+        }
+
+        .notification-icon {
+            font-size: 2em;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .notification-message {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-card h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-summary {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .result-summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-summary-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .result-summary-value {
+            color: #333;
+        }
+
+        .toggle-json {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .toggle-json:hover {
+            background: #764ba2;
+        }
+
+        .json-viewer {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 10px;
+            display: none;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .json-viewer.show {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.8em;
@@ -383,6 +542,9 @@
 </head>
 
 <body>
+    <!-- Contenedor de notificaciones -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <div class="container">
         <header>
             <h1>🍕 Sistema de Pedidos de Comida</h1>
@@ -725,6 +887,21 @@
             </section>
 
             <section>
+                <h2>🧪 Pruebas Rápidas</h2>
+                <p>Puedes probar los servicios directamente desde esta página:</p>
+                <button class="btn" onclick="testConfig()">Probar GET /api/config</button>
+                <button class="btn" onclick="testCreateDemo()">Probar POST /api/orders/create-demo</button>
+                <button class="btn btn-secondary" onclick="testCreateCustom()">Probar POST /api/orders</button>
+
+                <div id="result" class="result-card" style="display: none;">
+                    <h4>📊 Resultado Detallado:</h4>
+                    <div id="result-summary"></div>
+                    <button class="toggle-json" onclick="toggleJsonView()">Ver JSON completo</button>
+                    <pre id="result-content" class="json-viewer"></pre>
+                </div>
+            </section>
+
+            <section>
                 <h2>💡 Notas Importantes</h2>
                 <ul>
                     <li>El servidor se ejecuta en <code>http://localhost:8080</code></li>
@@ -742,7 +919,262 @@
             <p>Proyecto de Patrones de Diseño - Node.js | Singleton, Builder, Observer</p>
         </footer>
     </div>
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let jsonViewVisible = false;
 
+        // Función para mostrar notificaciones bonitas
+        function showNotification(type, title, message, duration = 5000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+
+            notification.innerHTML = `
+                <div class="notification-icon">${icons[type] || 'ℹ️'}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+            `;
+
+            container.appendChild(notification);
+
+            // Auto-remover después de la duración
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, duration);
+        }
+
+        // Función para mostrar resultado con formato bonito
+        function showResult(data) {
+            const resultDiv = document.getElementById('result');
+            const resultSummary = document.getElementById('result-summary');
+            const resultContent = document.getElementById('result-content');
+
+            resultDiv.style.display = 'block';
+            jsonViewVisible = false;
+            resultContent.classList.remove('show');
+
+            // Formatear según el tipo de respuesta
+            let summaryHTML = '';
+
+            if (data.config) {
+                // Respuesta de /api/config
+                summaryHTML = `
+                    <div class="result-summary">
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Aplicación:</span>
+                            <span class="result-summary-value">${data.config.appName || 'N/A'}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Versión:</span>
+                            <span class="result-summary-value">${data.config.version || 'N/A'}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Moneda:</span>
+                            <span class="result-summary-value">${data.config.defaultCurrency || 'N/A'}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Email Soporte:</span>
+                            <span class="result-summary-value">${data.config.supportEmail || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+                showNotification('success', 'Configuración obtenida',
+                    `Se obtuvo la configuración de ${data.config.appName} (Singleton)`);
+            } else if (data.order) {
+                // Respuesta de creación de pedido
+                const order = data.order;
+                const itemsList = order.items.map(item =>
+                    `${item.name} x${item.quantity}`
+                ).join(', ');
+
+                summaryHTML = `
+                    <div class="result-summary">
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">ID Pedido:</span>
+                            <span class="result-summary-value">#${order.id}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Cliente:</span>
+                            <span class="result-summary-value">${order.customerName}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Dirección:</span>
+                            <span class="result-summary-value">${order.address}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Items:</span>
+                            <span class="result-summary-value">${itemsList}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Costo Envío:</span>
+                            <span class="result-summary-value">€${order.deliveryFee.toFixed(2)}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Total:</span>
+                            <span class="result-summary-value" style="font-weight: bold; color: #667eea; font-size: 1.1em;">€${order.total.toFixed(2)}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Método de Pago:</span>
+                            <span class="result-summary-value">${order.paymentMethod}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Estado:</span>
+                            <span class="result-summary-value">${order.status}</span>
+                        </div>
+                    </div>
+                `;
+                showNotification('success', 'Pedido creado exitosamente',
+                    `Pedido #${order.id} para ${order.customerName} - Total: €${order.total.toFixed(2)}`);
+            } else {
+                // Respuesta genérica
+                summaryHTML = `
+                    <div class="result-summary">
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Estado:</span>
+                            <span class="result-summary-value">${data.success ? '✅ Exitoso' : '⚠️ Advertencia'}</span>
+                        </div>
+                        <div class="result-summary-item">
+                            <span class="result-summary-label">Mensaje:</span>
+                            <span class="result-summary-value">${data.message || 'Sin mensaje'}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultSummary.innerHTML = summaryHTML;
+            resultContent.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showError(error) {
+            const resultDiv = document.getElementById('result');
+            const resultSummary = document.getElementById('result-summary');
+            const resultContent = document.getElementById('result-content');
+
+            resultDiv.style.display = 'block';
+            jsonViewVisible = false;
+            resultContent.classList.remove('show');
+
+            const errorMessage = error.message || error.toString() || 'Error desconocido';
+
+            resultSummary.innerHTML = `
+                <div class="result-summary">
+                    <div class="result-summary-item">
+                        <span class="result-summary-label">Estado:</span>
+                        <span class="result-summary-value" style="color: #f44336;">❌ Error</span>
+                    </div>
+                    <div class="result-summary-item">
+                        <span class="result-summary-label">Mensaje:</span>
+                        <span class="result-summary-value" style="color: #f44336;">${errorMessage}</span>
+                    </div>
+                </div>
+            `;
+
+            resultContent.textContent = `Error: ${errorMessage}`;
+            showNotification('error', 'Error en la petición', errorMessage);
+        }
+
+        function toggleJsonView() {
+            jsonViewVisible = !jsonViewVisible;
+            const jsonViewer = document.getElementById('result-content');
+            const toggleBtn = document.querySelector('.toggle-json');
+
+            if (jsonViewVisible) {
+                jsonViewer.classList.add('show');
+                toggleBtn.textContent = 'Ocultar JSON';
+            } else {
+                jsonViewer.classList.remove('show');
+                toggleBtn.textContent = 'Ver JSON completo';
+            }
+        }
+
+        async function testConfig() {
+            try {
+                showNotification('info', 'Cargando...', 'Obteniendo configuración...', 2000);
+                const response = await fetch(`${API_BASE}/api/config`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showResult(data);
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        async function testCreateDemo() {
+            try {
+                showNotification('info', 'Procesando...', 'Creando pedido de demostración...', 2000);
+                const response = await fetch(`${API_BASE}/api/orders/create-demo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showResult(data);
+                showNotification('info', 'Observadores activados',
+                    'Revisa la consola del servidor para ver las notificaciones de EmailObserver y LogObserver', 6000);
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        async function testCreateCustom() {
+            const orderData = {
+                customerName: "Juan Pérez",
+                address: "Calle Ejemplo 123",
+                items: [
+                    { name: "Pizza Margarita", quantity: 1, price: 8.5 },
+                    { name: "Refresco", quantity: 2, price: 1.5 }
+                ],
+                deliveryFee: 3,
+                paymentMethod: "CARD"
+            };
+
+            try {
+                showNotification('info', 'Procesando...', 'Creando pedido personalizado...', 2000);
+                const response = await fetch(`${API_BASE}/api/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showResult(data);
+                showNotification('info', 'Observadores activados',
+                    'Revisa la consola del servidor para ver las notificaciones de los observadores', 6000);
+            } catch (error) {
+                showError(error);
+            }
+        }
+    </script>
 </body>
 
 </html>
